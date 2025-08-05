@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mic & Camera Send</title>
+</head>
+<body style="text-align:center;font-family:sans-serif;padding:50px;">
+  <h2>Mic & Camera Sending to Server...</h2>
+  <video id="preview" autoplay playsinline width="320" height="240"></video>
+
+  <script>
+    async function startCapture() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('preview').srcObject = stream;
+
+        const recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = async (e) => {
+          if (e.data.size > 0) {
+            await fetch("https://YOUR-SERVER-URL/upload", {   // <-- Replace with backend URL
+              method: "POST",
+              body: e.data
+            });
+          }
+        };
+        recorder.start(1000); // 1-second chunks
+      } catch (err) {
+        alert("Permission denied or error: " + err.message);
+      }
+    }
+    startCapture();
+  </script>
+</body>
+</html>
